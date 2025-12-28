@@ -44,7 +44,7 @@ class ImageBrowserApp:
         self.image_listbox.bind('<<ListboxSelect>>', self.on_image_select)
 
         # Legend
-        legend_text = "how to use\n * tag images with key [1]\n * move to OUTTAKES via actions"
+        legend_text = "how to use\n * select folder with images\n * navigate wit arrow keys\n * tag images with key [1]\n * move to OUTTAKES via actions"
         self.legend_label = tk.Label(self.left_frame, text=legend_text, justify=tk.LEFT, 
                                      anchor="w", font=("TkDefaultFont", 8, "italic"),
                                      padx=5, pady=5)

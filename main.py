@@ -36,12 +36,19 @@ class ImageBrowserApp:
         # Left Column - Listbox
         self.left_frame = tk.Frame(self.paned_window, width=300)
         self.image_listbox = tk.Listbox(self.left_frame)
-        self.image_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.image_listbox.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-        scrollbar = tk.Scrollbar(self.left_frame, command=self.image_listbox.yview)
+        scrollbar = tk.Scrollbar(self.image_listbox, command=self.image_listbox.yview)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.image_listbox.config(yscrollcommand=scrollbar.set)
         self.image_listbox.bind('<<ListboxSelect>>', self.on_image_select)
+
+        # Legend
+        legend_text = "how to use\n * tag images with key [1]\n * move to OUTTAKES via actions"
+        self.legend_label = tk.Label(self.left_frame, text=legend_text, justify=tk.LEFT, 
+                                     anchor="w", font=("TkDefaultFont", 8, "italic"),
+                                     padx=5, pady=5)
+        self.legend_label.pack(side=tk.BOTTOM, fill=tk.X)
 
         # Right Column - Preview
         self.right_frame = tk.Frame(self.paned_window, bg="gray")
@@ -68,6 +75,7 @@ class ImageBrowserApp:
         folder_path = filedialog.askdirectory()
         if folder_path:
             self.current_folder = folder_path
+            self.root.title(f"Image Browser - {self.current_folder}")
             self.tags_file = os.path.join(folder_path, self.TAGS_FILENAME)
             self.load_tags()
             self.load_images()

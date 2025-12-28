@@ -2,7 +2,7 @@ import os
 import shutil
 import tkinter as tk
 from tkinter import filedialog, messagebox
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageOps
 import json
 from typing import List, Dict
 import hashlib
@@ -227,6 +227,9 @@ class ImageBrowserApp:
             height = max(self.right_frame.winfo_height() - 20, 100)
             
             img = Image.open(filepath)
+            # Auto-rotate based on EXIF data
+            img = ImageOps.exif_transpose(img)
+            
             img.thumbnail((width, height))
             self.tk_img = ImageTk.PhotoImage(img)
             self.preview_label.config(image=self.tk_img, text="")

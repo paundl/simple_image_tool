@@ -45,7 +45,7 @@ class ImageBrowserApp:
 
         # Legend
         legend_text = "how to use\n * select folder with images\n * navigate wit arrow keys\n * tag images with key [1]\n * move to OUTTAKES via actions"
-        self.legend_label = tk.Label(self.left_frame, text=legend_text, justify=tk.LEFT, 
+        self.legend_label = tk.Label(self.left_frame, text=legend_text, justify=tk.LEFT,
                                      anchor="w", font=("TkDefaultFont", 8, "italic"),
                                      padx=5, pady=5)
         self.legend_label.pack(side=tk.BOTTOM, fill=tk.X)
@@ -70,6 +70,9 @@ class ImageBrowserApp:
         action_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="Actions", menu=action_menu)
         action_menu.add_command(label="Move to OUTTAKES", command=self.move_outtakes)
+        action_menu.add_command(label="Move all raw images to dir RAW", command=self.move_all_nef_to_raw_dir)
+        action_menu.add_separator()
+        action_menu.add_command(label="Remove all tags", command=self.remove_all_tags)
 
     def open_folder(self):
         folder_path = filedialog.askdirectory()
@@ -320,6 +323,73 @@ class ImageBrowserApp:
 
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred: {e}")
+
+    def move_all_nef_to_raw_dir(self):
+        if not self.current_folder:
+            messagebox.showwarning("No Folder", "Please open a folder first.")
+            return
+
+        try:
+            nef_files = [
+                f for f in os.listdir(self.current_folder)
+                if os.path.isfile(os.path.join(self.current_folder, f)) and f.lower().endswith(".nef")
+            ]
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not scan folder: {e}")
+            return
+
+        if not nef_files:
+            messagebox.showinfo("No RAW", "No NEF files found in this folder.")
+            return
+
+        confirm = messagebox.askyesno(
+            "Confirm move",
+            f"This will move {len(nef_files)} NEF file(s) into:\n"
+            f"{os.path.join(self.current_folder, 'RAW')}\n\n"
+            f"Do you want to continue?"
+        )
+        if not confirm:
+            return
+
+        raw_dir = os.path.join(self.current_folder, "RAW")
+        try:
+            os.makedirs(raw_dir, exist_ok=True)
+
+            moved_count = 0
+            for filename in nef_files:
+                src = os.path.join(self.current_folder, filename)
+                dst = os.path.join(raw_dir, filename)
+                shutil.move(src, dst)
+                moved_count += 1
+
+            # Refresh UI
+            self.load_images()
+            self.preview_label.config(image='', text="Select an image to preview")
+
+            messagebox.showinfo("Operation Complete", f"Moved {moved_count} NEF file(s) to RAW.")
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred: {e}")
+
+    def remove_all_tags(self):
+        if not self.current_folder:
+            messagebox.showwarning("No Folder", "Please open a folder first.")
+            return
+
+        if not self.tags:
+            messagebox.showinfo("No Tags", "There are no tags to remove.")
+            return
+
+        confirm = messagebox.askyesno(
+            "Remove all tags",
+            f"This will remove all tags for {len(self.tags)} file(s).\n\nDo you want to continue?"
+        )
+        if not confirm:
+            return
+
+        self.tags = {}
+        self.save_tags()
+        self.load_images()
+        self.preview_label.config(image='', text="Select an image to preview")
 
 if __name__ == "__main__":
     root = tk.Tk()

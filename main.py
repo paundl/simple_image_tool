@@ -101,6 +101,7 @@ class ImageBrowserApp:
         try:
             files = [f for f in os.listdir(self.current_folder)
                      if f.lower().endswith(self.IMAGE_EXTENSIONS)]
+            files.sort(key=str.casefold)
             if not files:
                 messagebox.showinfo("No Images", "No supported image files found.")
                 return
